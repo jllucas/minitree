@@ -3,21 +3,23 @@ package history
 import (
 	"bytes"
 	"fmt"
+
+	"github.com/jllucas/minitree/common"
 )
 
 // Recursive search will never reach depth 0.
-func (t historyTree) computeHashPostOrder(depth int, rootNode position) hash {
-	var leftHash, rightHash hash
+func (t historyTree) computeHashPostOrder(depth int, rootNode common.Position) common.Hash {
+	var leftHash, rightHash common.Hash
 
-	leftNode := getLeftNode(rootNode)
-	if value, ok := t.content[leftNode]; ok {
+	leftNode := rootNode.GetLeftNode()
+	if value, ok := t.Store[leftNode]; ok {
 		leftHash = value
 	} else {
 		leftHash = t.computeHashPostOrder(depth-1, leftNode)
 	}
 
-	rightNode := getRightNode(rootNode)
-	if value, ok := t.content[rightNode]; ok {
+	rightNode := rootNode.GetRightNode()
+	if value, ok := t.Store[rightNode]; ok {
 		rightHash = value
 	} else {
 		rightHash = t.computeHashPostOrder(depth-1, rightNode)
@@ -27,20 +29,20 @@ func (t historyTree) computeHashPostOrder(depth int, rootNode position) hash {
 }
 
 // Not implemented: comparison between eventHash parameter and Xi.
-func (t historyTree) VerifyMembershipProof(index int, rootHash hash, eventHash hash) bool {
+func (t historyTree) VerifyMembershipProof(index int, rootHash common.Hash, eventHash common.Hash) bool {
 	depth := computeDepth(t.version)
-	root := position{0, depth}
+	root := common.NewPosition(0, depth)
 	computedRootHash := t.computeHashPostOrder(depth, root)
-	fmt.Printf("\nComputed root hash: %x", computedRootHash)
-	fmt.Printf("\nRoot hash: %x", rootHash)
+	fmt.Printf("\nComputed root common.Hash: %x", computedRootHash)
+	fmt.Printf("\nRoot common.Hash: %x", rootHash)
 	return bytes.Equal(computedRootHash, rootHash)
 }
 
 // indexI, indexJ are useless if we can guess both index from their commitments.
-func (t historyTree) VerifyIncrementalProof(commitmentI, commitmentJ hash, indexI, indexJ int) bool {
+func (t historyTree) VerifyIncrementalProof(commitmentI, commitmentJ common.Hash, indexI, indexJ int) bool {
 	prunedTree := t.GenerateMembershipProof(indexI, commitmentI, indexI)
 	prunedTree.Prettyfy()
-	Iverified := prunedTree.VerifyMembershipProof(indexI, commitmentI, hash{})
-	Jverified := t.VerifyMembershipProof(indexJ, commitmentJ, hash{})
+	Iverified := prunedTree.VerifyMembershipProof(indexI, commitmentI, common.Hash{})
+	Jverified := t.VerifyMembershipProof(indexJ, commitmentJ, common.Hash{})
 	return (Iverified && Jverified)
 }
