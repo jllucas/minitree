@@ -2,7 +2,6 @@ package history
 
 import (
 	"bytes"
-	"fmt"
 
 	"github.com/jllucas/minitree/common"
 )
@@ -33,15 +32,12 @@ func (t historyTree) VerifyMembershipProof(index int, rootHash common.Hash, even
 	depth := computeDepth(t.version)
 	root := common.NewPosition(0, depth)
 	computedRootHash := t.computeHashPostOrder(depth, root)
-	fmt.Printf("\nComputed root common.Hash: %x", computedRootHash)
-	fmt.Printf("\nRoot common.Hash: %x", rootHash)
 	return bytes.Equal(computedRootHash, rootHash)
 }
 
 // indexI, indexJ are useless if we can guess both index from their commitments.
 func (t historyTree) VerifyIncrementalProof(commitmentI, commitmentJ common.Hash, indexI, indexJ int) bool {
 	prunedTree := t.GenerateMembershipProof(indexI, commitmentI, indexI)
-	prunedTree.Prettyfy()
 	Iverified := prunedTree.VerifyMembershipProof(indexI, commitmentI, common.Hash{})
 	Jverified := t.VerifyMembershipProof(indexJ, commitmentJ, common.Hash{})
 	return (Iverified && Jverified)

@@ -64,7 +64,6 @@ func (t *historyTree) updatePostOrder(depth int, rootNode common.Position) {
 		hashLeft := t.getHash(leftNode)
 		hashRight := t.getHash(rightNode)
 		t.Store[currentNode] = computeHashInterior(hashLeft, hashRight)
-		//		fmt.Println(currentNode)
 	}
 }
 
@@ -74,8 +73,6 @@ func (t *historyTree) Add(event []byte) common.Hash {
 	// Add event hash
 	pos := common.NewPosition(t.version, 0)
 	t.Store[pos] = computeHashLeaf(event)
-	//	fmt.Printf("%x\n", eventHash)
-	//	fmt.Println(pos)
 
 	// Compute root node and update tree in post-order
 	depth := computeDepth(t.version)
