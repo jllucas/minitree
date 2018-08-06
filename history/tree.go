@@ -115,8 +115,8 @@ func (t historyTree) GenerateMembershipProof(index int, commitment common.Hash, 
 	}
 
 	depth := computeDepth(version)
-	root := common.Position{0, depth}
-	leaf := common.Position{index, 0}
+	root := common.NewPosition(0, depth)
+	leaf := common.NewPosition(index, 0)
 	t.navigatePostOrder(depth, root, leaf, proofTree)
 
 	return proofTree
