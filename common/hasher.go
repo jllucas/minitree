@@ -13,6 +13,10 @@ sha256 Hasher: current hashing method.
 */
 type Sha256Hasher struct{}
 
+func NewSha256Hasher() Sha256Hasher {
+	return Sha256Hasher{}
+}
+
 func (h Sha256Hasher) DoHash(events ...[]byte) Hash {
 	sha := sha256.New()
 
@@ -27,6 +31,10 @@ func (h Sha256Hasher) DoHash(events ...[]byte) Hash {
 XOR Hasher: needed for testing.
 */
 type XORHasher struct{}
+
+func NewXORHasher() XORHasher {
+	return XORHasher{}
+}
 
 // From https://golang.org/src/crypto/cipher/xor.go
 func (h XORHasher) DoHash(eventA, eventB []byte) Hash {
