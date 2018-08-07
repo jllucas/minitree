@@ -18,7 +18,7 @@ func TestXORHash(t *testing.T) {
 		"7 XOR 8": {[]byte{0x07}, []byte{0x08}, Hash{0x0f}},
 	}
 
-	hasher := XORHasher{}
+	hasher := NewXORHasher()
 	for testname, test := range tests {
 		computedHash := hasher.DoHash(test.eventA, test.eventB)
 		assert.Equalf(t, test.expectedHash, computedHash, "Hashes don't match in test: %s", testname)
@@ -50,7 +50,7 @@ func TestSHA256Hash(t *testing.T) {
 			[]byte{0xfd, 0x9a, 0xf3, 0xd2, 0x89, 0xe1, 0xc7, 0xb2, 0x2c, 0x64, 0x8a, 0x4f, 0x31, 0x63, 0x81, 0xe7, 0xc, 0x63, 0xf8, 0x29, 0x4d, 0x3d, 0xc5, 0x7d, 0xbe, 0xc8, 0x2d, 0x32, 0x92, 0x40, 0x91, 0x5}},
 	}
 
-	hasher := Sha256Hasher{}
+	hasher := NewSha256Hasher()
 	for testname, test := range tests {
 		computedHash := hasher.DoHash(test.id, test.eventA, test.eventB)
 		assert.Equalf(t, test.expectedHash, computedHash, "Hashes don't match in test: %s", testname)
