@@ -20,7 +20,7 @@ func TestInsert(t *testing.T) {
 		{"Insert empty key", []byte{}, []byte(strconv.Itoa(1)), badger.ErrEmptyKey},
 	}
 
-	db, _ := NewBadgerStore()
+	db, _ := NewBadger()
 	defer db.Close()
 	for _, test := range tests {
 		err := db.Insert(test.key, test.value)
@@ -42,7 +42,7 @@ func TestGet(t *testing.T) {
 		{"Get 3", []byte(strconv.Itoa(3)), []byte(strconv.Itoa(3)), nil},
 	}
 
-	db, _ := NewBadgerStore()
+	db, _ := NewBadger()
 	defer db.Close()
 	for _, test := range tests {
 		db.Insert(test.key, test.value)
@@ -53,5 +53,24 @@ func TestGet(t *testing.T) {
 }
 
 func TestGetRange(t *testing.T) {
+	tests := []struct {
+		testname      string
+		start         []byte
+		end           []byte
+		expectedRange KVRange
+	}{
+		{"Get range 0-5", []byte(strconv.Itoa(0)), []byte(strconv.Itoa(5)), KVRange{}},
+		{"Get range 100-200", []byte(strconv.Itoa(100)), []byte(strconv.Itoa(200)), KVRange{}},
+	}
 
+	db, _ := NewBadger()
+	defer db.Close()
+	for i := 0; i < 1e3; i++ {
+		db.Insert([]byte(strconv.Itoa(i)), []byte(strconv.Itoa(i)))
+	}
+
+	for _, test := range tests {
+		result, _ := db.GetRange(test.start, test.end)
+		assert.Equalf(t, test.expectedRange, result, "Ranges don't match in test: %s", test.testname)
+	}
 }

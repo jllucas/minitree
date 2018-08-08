@@ -8,7 +8,7 @@ type Badger struct {
 	*badger.DB
 }
 
-func NewBadgerStore() (*Badger, error) {
+func NewBadger() (*Badger, error) {
 	opts := badger.DefaultOptions
 	opts.Dir = "/tmp/badger"
 	opts.ValueDir = "/tmp/badger"
@@ -41,4 +41,32 @@ func (db Badger) Insert(key, value []byte) error {
 		return txn.Set(key, value)
 	})
 	return err
+}
+
+type KVRange struct {
+	keys   [][]byte
+	values [][]byte
+}
+
+func (db Badger) GetRange(start, end []byte) (KVRange, error) {
+	var rangeOfLeaves KVRange
+	err := db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.PrefetchValues = false
+		it := txn.NewIterator(opts)
+		defer it.Close()
+
+		for it.Seek(start); it.ValidForPrefix(end); it.Next() {
+			item := it.Item()
+			k := item.Key()
+			v, err := item.Value()
+			if err != nil {
+				return err
+			}
+			rangeOfLeaves.keys = append(rangeOfLeaves.keys, k)
+			rangeOfLeaves.values = append(rangeOfLeaves.values, v)
+		}
+		return nil
+	})
+	return rangeOfLeaves, err
 }

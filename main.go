@@ -11,7 +11,7 @@ func main() {
 	var rootHash []byte
 
 	// Create tree
-	hTree := history.NewTree()
+	hTree := history.NewHistoryTree()
 	fmt.Println(hTree)
 
 	// Insert events.

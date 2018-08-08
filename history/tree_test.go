@@ -20,7 +20,7 @@ func TestAdd(t *testing.T) {
 		{"Add 1", []byte(strconv.Itoa((1))), []byte{0xfd, 0x9a, 0xf3, 0xd2, 0x89, 0xe1, 0xc7, 0xb2, 0x2c, 0x64, 0x8a, 0x4f, 0x31, 0x63, 0x81, 0xe7, 0xc, 0x63, 0xf8, 0x29, 0x4d, 0x3d, 0xc5, 0x7d, 0xbe, 0xc8, 0x2d, 0x32, 0x92, 0x40, 0x91, 0x5}},
 	}
 
-	tree := NewTree()
+	tree := NewHistoryTree()
 	for _, test := range tests {
 		rootHash := tree.Add(test.event)
 		assert.Equalf(t, test.expectedRootHash, rootHash, "Hashes don't match in test: %s", test.testname)
@@ -31,18 +31,18 @@ func TestAdd(t *testing.T) {
 func TestGenerateMembershipProof(t *testing.T) {
 	testsOK := map[string]struct {
 		index, version int
-		expectedTree   historyTree
+		expectedTree   HistoryTree
 	}{
-		"Index 2 in version 2": {2, 2, historyTree{version: 2,
-			Store: common.Store{
+		"Index 2 in version 2": {2, 2, HistoryTree{version: 2,
+			Store: common.HistoryMemoryStore{
 				{Index: 0, Layer: 1}: {},
 				{Index: 2, Layer: 0}: {},
 				{Index: 3, Layer: 0}: {},
 			},
 		},
 		},
-		"Index 2 in version 4": {2, 4, historyTree{version: 4,
-			Store: common.Store{
+		"Index 2 in version 4": {2, 4, HistoryTree{version: 4,
+			Store: common.HistoryMemoryStore{
 				{Index: 0, Layer: 1}: {},
 				{Index: 2, Layer: 0}: {},
 				{Index: 3, Layer: 0}: {},
@@ -50,17 +50,17 @@ func TestGenerateMembershipProof(t *testing.T) {
 			},
 		},
 		}, // Index > tree version.
-		"Index greater than version": {100, 2, historyTree{version: -1,
-			Store: common.NewStore(),
+		"Index greater than version": {100, 2, HistoryTree{version: -1,
+			Store: common.NewHistoryMemoryStore(),
 		},
 		}, // Version > tree version.
-		"Version greater than tree version": {2, 15, historyTree{version: -1,
-			Store: common.NewStore(),
+		"Version greater than tree version": {2, 15, HistoryTree{version: -1,
+			Store: common.NewHistoryMemoryStore(),
 		},
 		},
 	}
 
-	tree := NewTree()
+	tree := NewHistoryTree()
 	// Add events.
 	for i := 0; i <= 7; i++ {
 		tree.Add([]byte(strconv.Itoa((i))))
@@ -83,18 +83,18 @@ func TestGenerateIncrementalProof(t *testing.T) {
 
 	testsOK := map[string]struct {
 		indexI, indexJ int
-		expectedTree   historyTree
+		expectedTree   HistoryTree
 	}{
-		"Inc. proof between 2 and 3": {2, 3, historyTree{version: 3,
-			Store: common.Store{
+		"Inc. proof between 2 and 3": {2, 3, HistoryTree{version: 3,
+			Store: common.HistoryMemoryStore{
 				{Index: 0, Layer: 1}: {},
 				{Index: 2, Layer: 0}: {},
 				{Index: 3, Layer: 0}: {},
 			},
 		},
 		},
-		"Inc. proof between 2 and 4": {2, 4, historyTree{version: 4,
-			Store: common.Store{
+		"Inc. proof between 2 and 4": {2, 4, HistoryTree{version: 4,
+			Store: common.HistoryMemoryStore{
 				{Index: 0, Layer: 1}: {},
 				{Index: 2, Layer: 0}: {},
 				{Index: 3, Layer: 0}: {},
@@ -104,8 +104,8 @@ func TestGenerateIncrementalProof(t *testing.T) {
 			},
 		},
 		},
-		"Inc. proof between 3 and 7": {3, 7, historyTree{version: 7,
-			Store: common.Store{
+		"Inc. proof between 3 and 7": {3, 7, HistoryTree{version: 7,
+			Store: common.HistoryMemoryStore{
 				{Index: 0, Layer: 1}: {},
 				{Index: 2, Layer: 0}: {},
 				{Index: 3, Layer: 0}: {},
@@ -115,22 +115,22 @@ func TestGenerateIncrementalProof(t *testing.T) {
 			},
 		},
 		},
-		"Inc. proof when i > j": {100, 2, historyTree{version: -1,
-			Store: common.NewStore(),
+		"Inc. proof when i > j": {100, 2, HistoryTree{version: -1,
+			Store: common.NewHistoryMemoryStore(),
 		},
 		},
-		"Inc. proof when j > tree version": {2, 15, historyTree{version: -1,
-			Store: common.NewStore(),
+		"Inc. proof when j > tree version": {2, 15, HistoryTree{version: -1,
+			Store: common.NewHistoryMemoryStore(),
 		},
 		},
 	}
 
 	testsKO := map[string]struct {
 		indexI, indexJ int
-		expectedTree   historyTree
+		expectedTree   HistoryTree
 	}{
-		"Wrong inc. proof between 2 and 4": {2, 4, historyTree{version: 1000,
-			Store: common.Store{
+		"Wrong inc. proof between 2 and 4": {2, 4, HistoryTree{version: 1000,
+			Store: common.HistoryMemoryStore{
 				{Index: 100, Layer: 0}: {},
 				{Index: 200, Layer: 0}: {},
 				{Index: 300, Layer: 0}: {},
@@ -141,7 +141,7 @@ func TestGenerateIncrementalProof(t *testing.T) {
 		},
 	}
 
-	tree := NewTree()
+	tree := NewHistoryTree()
 	// Add events.
 	for i := 0; i <= 7; i++ {
 		tree.Add([]byte(strconv.Itoa((i))))

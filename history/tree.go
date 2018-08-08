@@ -9,16 +9,16 @@ import (
 	"github.com/kr/pretty"
 )
 
-type historyTree struct {
+type HistoryTree struct {
 	version int
-	common.Store
+	Store   common.HistoryMemoryStore
 }
 
-func NewTree() historyTree {
-	return historyTree{-1, common.NewStore()}
+func NewHistoryTree() HistoryTree {
+	return HistoryTree{-1, common.NewHistoryMemoryStore()}
 }
 
-func (t historyTree) Prettyfy() {
+func (t HistoryTree) Prettyfy() {
 	fmt.Printf("%# v \n", pretty.Formatter(t))
 }
 
@@ -39,7 +39,7 @@ func computeHashInterior(event []byte, right []byte) common.Hash {
 	return sha.Sum(nil)
 }
 
-func (t historyTree) getHash(pos common.Position) common.Hash {
+func (t HistoryTree) getHash(pos common.Position) common.Hash {
 	return t.Store.Get(pos)
 }
 
@@ -47,7 +47,7 @@ func computeDepth(version int) int {
 	return int(math.Ceil(math.Log2(float64(version + 1))))
 }
 
-func (t *historyTree) updatePostOrder(depth int, rootNode common.Position) {
+func (t *HistoryTree) updatePostOrder(depth int, rootNode common.Position) {
 	currentNode := rootNode
 
 	if depth > 0 {
@@ -68,7 +68,7 @@ func (t *historyTree) updatePostOrder(depth int, rootNode common.Position) {
 }
 
 // Add event to the history tree.
-func (t *historyTree) Add(event []byte) common.Hash {
+func (t *HistoryTree) Add(event []byte) common.Hash {
 	t.version++
 	// Add event hash
 	pos := common.NewPosition(t.version, 0)
@@ -81,7 +81,7 @@ func (t *historyTree) Add(event []byte) common.Hash {
 	return t.Store.Get(root)
 }
 
-func (t historyTree) navigatePostOrder(depth int, currentNode, leaf common.Position, proofTree historyTree) {
+func (t HistoryTree) navigatePostOrder(depth int, currentNode, leaf common.Position, proofTree HistoryTree) {
 
 	if depth > 0 {
 		currentNodeValue := currentNode.ComputeNodeValue()
@@ -104,14 +104,14 @@ func (t historyTree) navigatePostOrder(depth int, currentNode, leaf common.Posit
 	}
 }
 
-func (t historyTree) GenerateMembershipProof(index int, commitment common.Hash, version int) historyTree {
+func (t HistoryTree) GenerateMembershipProof(index int, commitment common.Hash, version int) HistoryTree {
 	if (version < index) || (version > t.version) {
-		return historyTree{-1, common.NewStore()}
+		return HistoryTree{-1, common.NewHistoryMemoryStore()}
 	}
 
-	proofTree := historyTree{
+	proofTree := HistoryTree{
 		version: version,
-		Store:   common.NewStore(),
+		Store:   common.NewHistoryMemoryStore(),
 	}
 
 	depth := computeDepth(version)
@@ -133,7 +133,7 @@ func getCommonRoot(indexI, indexJ int, root common.Position) common.Position {
 	}
 }
 
-func (t *historyTree) cleanProof(indexI, indexJ int) {
+func (t *HistoryTree) cleanProof(indexI, indexJ int) {
 	depth := computeDepth(indexJ)
 	commonRoot := getCommonRoot(indexI, indexJ, common.Position{0, depth})
 	// Delete unnecessary nodes.
@@ -145,9 +145,9 @@ func (t *historyTree) cleanProof(indexI, indexJ int) {
 	}
 }
 
-func (t historyTree) GenerateIncrementalProof(indexI, indexJ int) historyTree {
+func (t HistoryTree) GenerateIncrementalProof(indexI, indexJ int) HistoryTree {
 	if (indexJ < indexI) || (indexJ > t.version) {
-		return historyTree{-1, common.NewStore()}
+		return HistoryTree{-1, common.NewHistoryMemoryStore()}
 	}
 
 	mProofI := t.GenerateMembershipProof(indexI, common.Hash{}, indexJ)

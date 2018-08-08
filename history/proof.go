@@ -7,7 +7,7 @@ import (
 )
 
 // Recursive search will never reach depth 0.
-func (t historyTree) computeHashPostOrder(depth int, rootNode common.Position) common.Hash {
+func (t HistoryTree) computeHashPostOrder(depth int, rootNode common.Position) common.Hash {
 	var leftHash, rightHash common.Hash
 
 	leftNode := rootNode.GetLeftNode()
@@ -28,7 +28,7 @@ func (t historyTree) computeHashPostOrder(depth int, rootNode common.Position) c
 }
 
 // Not implemented: comparison between eventHash parameter and Xi.
-func (t historyTree) VerifyMembershipProof(index int, rootHash common.Hash, eventHash common.Hash) bool {
+func (t HistoryTree) VerifyMembershipProof(index int, rootHash common.Hash, eventHash common.Hash) bool {
 	depth := computeDepth(t.version)
 	root := common.NewPosition(0, depth)
 	computedRootHash := t.computeHashPostOrder(depth, root)
@@ -36,7 +36,7 @@ func (t historyTree) VerifyMembershipProof(index int, rootHash common.Hash, even
 }
 
 // indexI, indexJ are useless if we can guess both index from their commitments.
-func (t historyTree) VerifyIncrementalProof(commitmentI, commitmentJ common.Hash, indexI, indexJ int) bool {
+func (t HistoryTree) VerifyIncrementalProof(commitmentI, commitmentJ common.Hash, indexI, indexJ int) bool {
 	prunedTree := t.GenerateMembershipProof(indexI, commitmentI, indexI)
 	Iverified := prunedTree.VerifyMembershipProof(indexI, commitmentI, common.Hash{})
 	Jverified := t.VerifyMembershipProof(indexJ, commitmentJ, common.Hash{})

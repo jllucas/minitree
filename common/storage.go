@@ -1,38 +1,55 @@
 package common
 
-type Storage interface {
-	Put()
-	Get()
+type HistoryStore interface {
+	Put(pos Position, event Hash)
+	Get(pos Position) Hash
 }
 
-type Store map[Position]Hash
+type HyperStore interface {
+	Put(key [256]byte, index int)
+	Get(key [256]byte) int
+}
 
-func NewStore() Store {
+type HistoryMemoryStore map[Position]Hash
+
+func NewHistoryMemoryStore() HistoryMemoryStore {
 	return make(map[Position]Hash)
 }
 
-func (s Store) Get(pos Position) Hash {
+func (s HistoryMemoryStore) Get(pos Position) Hash {
 	return s[pos]
 }
 
-func (s Store) Put(pos Position, event Hash) {
+func (s HistoryMemoryStore) Put(pos Position, event Hash) {
 	s[pos] = event
 }
 
-type HyperStore map[[256]byte]int
+type HyperMemoryStore map[[256]byte]int
 
-func NewHyperStore() HyperStore {
+func NewHyperMemoryStore() HyperMemoryStore {
 	return make(map[[256]byte]int)
 }
 
-func (s HyperStore) Get(key Hash) int {
-	var toArray [256]byte
-	copy(toArray[:], key)
-	return s[toArray]
+func (s HyperMemoryStore) Get(key [256]byte) int {
+	return s[key]
 }
 
-func (s HyperStore) Put(key Hash, value int) {
-	var toArray [256]byte
-	copy(toArray[:], key)
-	s[toArray] = value
+func (s HyperMemoryStore) Put(key [256]byte, index int) {
+	s[key] = index
 }
+
+/* type BadgerStore badger.Badger
+
+func NewBadgerStore() BadgerStore {
+	db, _ := badger.NewBadger()
+	return db
+}
+
+func (s BadgerStore) Get(key [256]byte) int {
+	value, _ := s.Get(key)
+	return 1
+}
+
+func (s BadgerStore) Put(key Hash, value int) error {
+	return nil
+} */

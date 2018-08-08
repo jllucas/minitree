@@ -4,13 +4,18 @@ import "github.com/jllucas/minitree/common"
 
 type HyperTree struct {
 	DefaultHashes []common.Hash
-	Cache         common.Store
+	Cache         common.HyperStore
 	Store         common.HyperStore
+	Hasher        common.Hasher
 }
 
-func NewHyperTree(depth uint8) HyperTree {
-	htree := HyperTree{}
-	htree.DefaultHashes = make([]common.Hash, depth)
+func NewHyperTree(depth uint8, cache, store common.HyperStore, hasher common.Hasher) HyperTree {
+	htree := HyperTree{
+		make([]common.Hash, depth),
+		cache,
+		store,
+		hasher,
+	}
 	htree.generateDefaultHashes(depth)
 	return htree
 }
