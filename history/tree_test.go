@@ -167,3 +167,11 @@ func TestGenerateIncrementalProof(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkAdd(b *testing.B) {
+	tree := NewHistoryTree()
+	b.N = 100000
+	for i := 0; i < b.N; i++ {
+		tree.Add([]byte(strconv.Itoa((i))))
+	}
+}
